@@ -34,7 +34,7 @@ namespace ParsehubParse.Models
         [JsonProperty("colour")]
         public string Colour { get; set; }
 
-        [JsonProperty("image_3")]
-        public string Image_3 { get; set; }
+        [JsonProperty("details")]
+        public List<Detail> Details { get; set; }
     }
 }
