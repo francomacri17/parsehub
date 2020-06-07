@@ -11,19 +11,23 @@ namespace ParsehubParse.BusinessLogic.Data
 {
     public class ParseHub
     {
-        public async Task<List<Product>> GetProductAsync(string path)
+        public async Task<Products> GetProductsAsync(string path)
         {
             try
             {
                 HttpClient client = new HttpClient();
 
-                List<Product> products = null;
+                Products products = null;
                 var response = await client.GetAsync(path);
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var jsonString = DataNormalizeHelper.Decompress(content);
-                    products = JsonConvert.DeserializeObject<List<Product>>(jsonString);
+                    byte[] data = DataNormalizeHelper.DecompressGzip(await response.Content.ReadAsStreamAsync());
+                    var jsonString = System.Text.Encoding.UTF8.GetString(data);
+                    
+                    jsonString = DataNormalizeHelper.RemoveSpecialCharacters(jsonString);
+
+                    products = JsonConvert.DeserializeObject<Products>(jsonString);
                 }
                 return products;
             }

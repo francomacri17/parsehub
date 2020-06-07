@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using ParsehubParse.BusinessLogic.Data;
+using ParsehubParse.BusinessLogic.Logic.Helper;
+using ParsehubParse.Models;
 
 namespace ParsehubParse.BusinessLogic.Logic
 {
@@ -14,9 +17,22 @@ namespace ParsehubParse.BusinessLogic.Logic
             var path = String.Format(productsBaseUrl, parseApiKey);
 
             var parseHub = new ParseHub();
-            var products = await parseHub.GetProductAsync(path);
+            var product = await parseHub.GetProductsAsync(path);
 
-            products = null;
+            foreach (var item in product.ProductsCollection)
+            {
+                var mercadoLibreItem = new MercadoLibreItem();
+                mercadoLibreItem.AvailityStock = 10;
+                mercadoLibreItem.Category = "";
+                mercadoLibreItem.Condition = "Nuevo";
+                mercadoLibreItem.CreatedDate = DateTime.UtcNow.ToString("dd/MM/yyyy hh:MM");
+                var description = DataNormalizeHelper.NormalizeDescription(item.Description_1, item.Description_2);
+                mercadoLibreItem.Description = DataNormalizeHelper.GetProductDescription(item.Name, description);
+                mercadoLibreItem.Id = "";
+                mercadoLibreItem.Images = DataNormalizeHelper.GetListImages(item);
+                mercadoLibreItem.PickUp = "Sí";
+                //mercadoLibreItem.Price = DataNormalizeHelper.DeterminePrice()
+            }
         }
     }
 }

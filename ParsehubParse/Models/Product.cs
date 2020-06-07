@@ -14,7 +14,7 @@ namespace ParsehubParse.Models
         public string Description_1 { get; set; }
 
         [JsonProperty("description_2")]
-        public Dictionary<string, string> Description_2 { get; set; }
+        public List<Dictionary<string, string>> Description_2 { get; set; }
 
         [JsonProperty("price_1")]
         public string Price_1 { get; set; }
