@@ -71,13 +71,17 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
             {
                 description = description_1;
             }
+
             if (description_2_collection != null)
             {
-                if (description_2_collection.Count() > 0)
+                if (description.Length < 250)
                 {
-                    foreach (var item in description_2_collection)
+                    if (description_2_collection.Count() > 0)
                     {
-                        description += item.Values;
+                        foreach (var item in description_2_collection)
+                        {
+                            description += $"{item} \n";
+                        }
                     }
                 }
             }
@@ -100,10 +104,9 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
         {
             var initialDescription = ConfigurationManager.AppSettings["InitialDescription"];
             var finalDescription = ConfigurationManager.AppSettings["FinalDescription"];
-            return  $"{initialDescription} \n" +
+            return  $"{initialDescription} \n \n" +
                     $"Titulo:  \n" +
                     $"{title} \n" +
-                    $"------------------------------------------------------- \n" +
                     $"\n" +
                     $"{description} \n" +
                     $"\n" +
