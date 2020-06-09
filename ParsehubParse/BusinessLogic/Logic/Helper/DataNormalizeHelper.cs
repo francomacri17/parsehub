@@ -1,11 +1,12 @@
-﻿using ParsehubParse.Models;
+﻿using ClosedXML.Excel;
+using ParsehubParse.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace ParsehubParse.BusinessLogic.Logic.Helper
@@ -99,38 +100,35 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
         {
             var initialDescription = ConfigurationManager.AppSettings["InitialDescription"];
             var finalDescription = ConfigurationManager.AppSettings["FinalDescription"];
-            return  $"{initialDescription} {Environment.NewLine} " +
-                    $"Titulo {Environment.NewLine}" +
-                    $"{title}{Environment.NewLine}" +
-                    $"-------------------------------------------------------" +
-                    $"{Environment.NewLine}" +
-                    $"{description}{Environment.NewLine}" +
-                    $"{ Environment.NewLine}" +
-                    $"{finalDescription}";
+            return  $"{initialDescription} \n" +
+                    $"Titulo:  \n" +
+                    $"{title} \n" +
+                    $"------------------------------------------------------- \n" +
+                    $"\n" +
+                    $"{description} \n" +
+                    $"\n" +
+                    $"{finalDescription} \n";
         }
 
-        public static double DeterminePrice(Product product)
+        public static double GetProductPrice(Product product)
         {
-            double pesosPrice = 0.0;
+            double dollarPrice = 0.0;
 
             if (product.Price_1 == null && product.Price_2 == null)
             {
-                return 0;
+                return dollarPrice;
             }
 
-            var dollarPrice = product.Price_1 != null ? 
+            dollarPrice = product.Price_1 != null ? 
                                 Convert.ToDouble(product.Price_1) : Convert.ToDouble(product.Price_2);
 
-            var weight = GetWeightOnKilos(product);
-
-
-            return pesosPrice;
+            return dollarPrice;
         }
 
         public static double GetWeightOnKilos(Product product)
         {
             var weightStr = "";
-            double weight = 0;
+            double weight = 1;
 
             int i = 0;
             while (i < product.Details.Count())
@@ -138,28 +136,118 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
                 if (product.Details[i].Detail_title == "Peso del producto")
                 {
                     weightStr = product.Details[i].Detail_value;
+                    i = product.Details.Count();
                 }
 
                 i++;
             }
 
-            if (weightStr.Contains("pounds"))
+            if (weightStr != "")
             {
-                weightStr.Replace(" pounds", "");
-                weight = Convert.ToDouble(weightStr);
-                weight = Math.Round((weight / 35.274) * 2, MidpointRounding.AwayFromZero) / 2;
 
-            }
+                if (weightStr.Contains("pounds"))
+                {
+                    weightStr = weightStr.Replace(" pounds", "");
+                    weight = Convert.ToDouble(weightStr);
+                    weight = Math.Round(((weight / 2.205) * 2), MidpointRounding.AwayFromZero) / 2;
 
-            if (weightStr.Contains("onzas"))
-            {
-                weightStr.Replace(" onzas", "");
+                }
 
-                weight = Convert.ToDouble(weightStr);
-                weight = Math.Round((weight / 2.205) * 2, MidpointRounding.AwayFromZero) / 2;
+                if (weightStr.Contains("onzas"))
+                {
+                    weightStr = weightStr.Replace(" onzas", "");
+                    weight = Convert.ToDouble(weightStr);
+                    weight = Math.Round((weight / 35.274) * 2, MidpointRounding.AwayFromZero) / 2;
+                }
             }
 
             return weight;
         } 
+
+        public static bool GnerateExcelFile(List<MercadoLibreItem> mercadoLibreItems)
+        {
+            try
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var destinationFolder = ConfigurationManager.AppSettings["DestinationFolder"];
+                    var path = $"{destinationFolder}\\products.xlsx";
+                    var worksheet = workbook.Worksheets.Add("Products");
+                    var currentRow = 1;
+
+                    worksheet.Cell(currentRow, 1).Value = "Id";
+                    worksheet.Cell(currentRow, 2).Value = "Categoria";
+                    worksheet.Cell(currentRow, 3).Value = "Titulo";
+                    worksheet.Cell(currentRow, 4).Value = "Descripcion";
+                    worksheet.Cell(currentRow, 5).Value = "Precio";
+                    worksheet.Cell(currentRow, 6).Value = "SKU";
+                    worksheet.Cell(currentRow, 7).Value = "Estado";
+                    worksheet.Cell(currentRow, 8).Value = "Stock";
+                    worksheet.Cell(currentRow, 9).Value = "Disponibilidad de stock";
+                    worksheet.Cell(currentRow, 10).Value = "Tipo de publicacion";
+                    worksheet.Cell(currentRow, 11).Value = "Condicion";
+                    worksheet.Cell(currentRow, 12).Value = "Envio Gratis";
+                    worksheet.Cell(currentRow, 13).Value = "Precio de envio";
+                    worksheet.Cell(currentRow, 14).Value = "Modo envio";
+                    worksheet.Cell(currentRow, 15).Value = "Metodo de envio";
+                    worksheet.Cell(currentRow, 16).Value = "Retiro en persona";
+                    worksheet.Cell(currentRow, 17).Value = "Garantia";
+                    worksheet.Cell(currentRow, 18).Value = "Fecha de creacion";
+                    worksheet.Cell(currentRow, 19).Value = "Última Actualización";
+                    worksheet.Cell(currentRow, 20).Value = "Resultado";
+                    worksheet.Cell(currentRow, 21).Value = "Resultado Observaciones";
+                    worksheet.Cell(currentRow, 22).Value = "Imagen 1";
+                    worksheet.Cell(currentRow, 23).Value = "Imagen 2";
+                    worksheet.Cell(currentRow, 24).Value = "Imagen 3";
+                    worksheet.Cell(currentRow, 25).Value = "Imagen 4";
+                    worksheet.Cell(currentRow, 26).Value = "Imagen 5";
+
+
+                    foreach (var item in mercadoLibreItems)
+                    {
+                        currentRow++;
+                        worksheet.Cell(currentRow, 1).Value = item.Id;
+                        worksheet.Cell(currentRow, 2).Value = item.Category;
+                        worksheet.Cell(currentRow, 3).Value = item.Title;
+                        worksheet.Cell(currentRow, 4).Value = item.Description;
+                        worksheet.Cell(currentRow, 5).Value = item.Price;
+                        worksheet.Cell(currentRow, 6).Value = item.SKU;
+                        worksheet.Cell(currentRow, 7).Value = item.State;
+                        worksheet.Cell(currentRow, 8).Value = item.Stock;
+                        worksheet.Cell(currentRow, 9).Value = item.AvailityStock;
+                        worksheet.Cell(currentRow, 10).Value = item.TypePublication;
+                        worksheet.Cell(currentRow, 11).Value = item.Condition;
+                        worksheet.Cell(currentRow, 12).Value = item.ShippingType;
+                        worksheet.Cell(currentRow, 13).Value = item.ShippingPrice;
+                        worksheet.Cell(currentRow, 14).Value = item.ShippingMode;
+                        worksheet.Cell(currentRow, 15).Value = item.ShippingMethod;
+                        worksheet.Cell(currentRow, 16).Value = item.PickUp;
+                        worksheet.Cell(currentRow, 17).Value = item.Warranty;
+                        worksheet.Cell(currentRow, 18).Value = item.CreatedDate;
+                        worksheet.Cell(currentRow, 19).Value = item.LastUpdated;
+                        worksheet.Cell(currentRow, 20).Value = item.Result;
+                        worksheet.Cell(currentRow, 21).Value = item.ResultObservations;
+                        worksheet.Cell(currentRow, 22).Value = item.Images[0] != null ? item.Images[0] : "";
+                        worksheet.Cell(currentRow, 23).Value = item.Images[1] != null ? item.Images[1] : "";
+                        worksheet.Cell(currentRow, 24).Value = item.Images[2] != null ? item.Images[2] : "";
+                        worksheet.Cell(currentRow, 25).Value = item.Images[3] != null ? item.Images[3] : "";
+                        worksheet.Cell(currentRow, 26).Value = item.Images[4] != null ? item.Images[4] : "";
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        Console.WriteLine($"Excel file created , you can find the file {path}");
+                        workbook.SaveAs(path);
+
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
     }
 }

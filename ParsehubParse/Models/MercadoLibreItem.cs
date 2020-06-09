@@ -42,6 +42,12 @@ namespace ParsehubParse.Models
 
         public string CreatedDate { get; set; }
 
+        public string LastUpdated { get; set; }
+
+        public string Result { get; set; }
+
+        public string ResultObservations { get; set; }
+
         public List<string> Images { get; set; }
     }
 }
