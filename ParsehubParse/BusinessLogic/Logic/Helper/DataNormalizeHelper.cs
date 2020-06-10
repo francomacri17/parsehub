@@ -47,10 +47,10 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
 
         public static string RemoveSpecialCharacters(string str)
         {
-            string removableChars = Regex.Escape(@"【】");
+            string removableChars = Regex.Escape(@"【】★√●✅🥉✓");
             string pattern = "[" + removableChars + "]";
 
-            return Regex.Replace(str, pattern, "");
+            return Regex.Replace(str, pattern, " ");
         }
 
         public static string SortTitle(string title)
@@ -80,7 +80,10 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
                     {
                         foreach (var item in description_2_collection)
                         {
-                            description += $"{item} \n";
+                            foreach (var dictionary in item)
+                            {
+                                description += $"{dictionary.Value} \n";
+                            }
                         }
                     }
                 }
@@ -116,6 +119,7 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
         public static double GetProductPrice(Product product)
         {
             double dollarPrice = 0.0;
+            var tax = Convert.ToDouble(ConfigurationManager.AppSettings["Tax"]);
 
             if (product.Price_1 == null && product.Price_2 == null)
             {
@@ -125,24 +129,43 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
             dollarPrice = product.Price_1 != null ? 
                                 Convert.ToDouble(product.Price_1) : Convert.ToDouble(product.Price_2);
 
-            return dollarPrice;
+
+
+            return dollarPrice / tax;
         }
 
         public static double GetWeightOnKilos(Product product)
         {
             var weightStr = "";
-            double weight = 1;
+            double weight = 2.00;
 
             int i = 0;
-            while (i < product.Details.Count())
-            {
-                if (product.Details[i].Detail_title == "Peso del producto")
-                {
-                    weightStr = product.Details[i].Detail_value;
-                    i = product.Details.Count();
-                }
 
-                i++;
+            if(product.Details != null)
+            {
+                while (i < product.Details.Count())
+                {
+                    if (product.Details[i].Detail_title == "Peso del producto")
+                    {
+                        weightStr = product.Details[i].Detail_value;
+                        i = product.Details.Count();
+                    }
+
+                    i++;
+                }
+            }
+            else if(product.Details_1 != null)
+            {
+                while (i < product.Details_1.Count())
+                {
+                    if (product.Details_1[i].Detail_title == "Peso del producto")
+                    {
+                        weightStr = product.Details_1[i].Detail_value;
+                        i = product.Details_1.Count();
+                    }
+
+                    i++;
+                }
             }
 
             if (weightStr != "")

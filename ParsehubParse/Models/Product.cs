@@ -36,5 +36,8 @@ namespace ParsehubParse.Models
 
         [JsonProperty("details")]
         public List<Detail> Details { get; set; }
+
+        [JsonProperty("details_1")]
+        public List<Detail> Details_1 { get; set; }
     }
 }
