@@ -49,5 +49,13 @@ namespace ParsehubParse.Models
         public string ResultObservations { get; set; }
 
         public List<string> Images { get; set; }
+
+        public string Author { get; set; }
+
+        public string Isbn10 { get; set; }
+
+        public string Editor { get; set; }
+
+        public string Paperback { get; set; }
     }
 }

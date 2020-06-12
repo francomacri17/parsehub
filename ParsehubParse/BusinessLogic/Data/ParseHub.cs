@@ -37,5 +37,32 @@ namespace ParsehubParse.BusinessLogic.Data
                 throw;
             }
         }
+
+        public async Task<Books> GetBooksAsync(string path)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+
+                Books books = null;
+                var response = await client.GetAsync(path);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    byte[] data = DataNormalizeHelper.DecompressGzip(await response.Content.ReadAsStreamAsync());
+                    var jsonString = System.Text.Encoding.UTF8.GetString(data);
+
+                    jsonString = DataNormalizeHelper.RemoveSpecialCharacters(jsonString);
+
+                    books = JsonConvert.DeserializeObject<Books>(jsonString);
+                }
+                return books;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
     }
 }
