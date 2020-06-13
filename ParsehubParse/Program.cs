@@ -18,7 +18,7 @@ namespace ParsehubParse
             Console.WriteLine("Generando productos Excel");
 
             var productsBusinessLogic = new ProductsBusinessLogic();
-            await productsBusinessLogic.GeneratedExcelBooksAsync();
+            await productsBusinessLogic.GeneratedExcelProductsAsync();
         }
     }
 }

@@ -47,7 +47,7 @@ namespace ParsehubParse.BusinessLogic.Logic.Helper
 
         public static string RemoveSpecialCharacters(string str)
         {
-            string removableChars = Regex.Escape(@"【】★√●✅🥉✓");
+            string removableChars = Regex.Escape(@"【】★√●✅🥉✓℃");
             string pattern = "[" + removableChars + "]";
 
             return Regex.Replace(str, pattern, " ");
